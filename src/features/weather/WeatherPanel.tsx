@@ -1,8 +1,10 @@
 import { useWeather, weatherDescription } from './api';
 export function WeatherPanel({
   coordinates,
+  locationName,
 }: {
   coordinates: [number, number] | null;
+  locationName?: string;
 }) {
   const query = useWeather(coordinates);
   return (
@@ -39,7 +41,9 @@ export function WeatherPanel({
               {Math.round(query.data.wind)} km/h
             </p>
             <p className="muted">
-              Model conditions at the country coordinates, not a city forecast.
+              {locationName
+                ? `Model conditions near ${locationName}.`
+                : 'Model conditions at the country coordinates, not a city forecast.'}{' '}
               Updated {query.data.time.replace('T', ' ')} UTC.
             </p>
             {query.isError && (

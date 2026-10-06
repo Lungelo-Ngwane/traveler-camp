@@ -22,7 +22,7 @@ it('submits labelled keyboard search and toggles an accessible favourite', async
   );
   const user = userEvent.setup();
   await user.type(
-    screen.getByLabelText('Search countries or capitals'),
+    screen.getByLabelText('Search places, countries or capitals'),
     'Tokyo{Enter}',
   );
   expect(screen.getByRole('heading', { name: 'Japan' })).toBeInTheDocument();
@@ -53,10 +53,10 @@ it('retains search text that happens to match the default sort value', async () 
     </MemoryRouter>,
   );
   await userEvent.type(
-    screen.getByLabelText('Search countries or capitals'),
+    screen.getByLabelText('Search places, countries or capitals'),
     'name{Enter}',
   );
-  expect(screen.getByLabelText('Search countries or capitals')).toHaveValue(
-    'name',
-  );
+  expect(
+    screen.getByLabelText('Search places, countries or capitals'),
+  ).toHaveValue('name');
 });

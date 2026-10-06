@@ -20,6 +20,10 @@ const router = createBrowserRouter([
         path: 'destinations/:countryCode',
         lazy: () => import('./features/destinations/Detail'),
       },
+      {
+        path: 'places/:destinationSlug',
+        lazy: () => import('./features/destinations/Detail'),
+      },
       { path: 'favourites', lazy: () => import('./features/favourites/Page') },
       { path: 'trip', lazy: () => import('./features/trip/Page') },
       { path: '*', Component: NotFound },

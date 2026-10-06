@@ -10,7 +10,7 @@ test('discovery and planner meet automated WCAG AA checks without horizontal ove
   await page.route('https://flagcdn.com/**', (route) => route.abort());
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: 'Japan', exact: true }),
+    page.getByRole('heading', { name: 'Tokyo', exact: true }),
   ).toBeVisible();
   expect(
     (

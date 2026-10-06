@@ -21,7 +21,8 @@ export function Layout() {
         ? 'Your trip'
         : location.pathname === '/favourites'
           ? 'Favourites'
-          : location.pathname.startsWith('/destinations/')
+          : location.pathname.startsWith('/destinations/') ||
+              location.pathname.startsWith('/places/')
             ? 'Destination guide'
             : 'Discover';
     document.title = `${label} · Roamly`;

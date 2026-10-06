@@ -18,7 +18,11 @@ export function Feedback({
 }
 export function LoadingCards() {
   return (
-    <div aria-busy="true" aria-label="Loading destinations" className="cards">
+    <div
+      aria-busy="true"
+      aria-label="Loading country guides"
+      className="country-grid"
+    >
       {Array.from({ length: 6 }, (_, i) => (
         <div key={i} className="skeleton" />
       ))}

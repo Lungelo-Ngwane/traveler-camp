@@ -1,13 +1,19 @@
 import { Link, useParams } from 'react-router-dom';
 import { useCountries } from './api';
+import { destinations } from './catalogue';
+import { DestinationVisual, PhotoCredit } from './DestinationVisual';
 import { Feedback, NotFound } from '../../components/Feedback';
 import { FavouriteButton } from './CountryCard';
 import { useTrip } from '../trip/context';
 import { WeatherPanel } from '../weather/WeatherPanel';
 export function Component() {
-  const { countryCode } = useParams();
+  const { countryCode, destinationSlug } = useParams();
+  const destination = destinations.find(
+    (place) => place.slug === destinationSlug,
+  );
   const query = useCountries();
   const trip = useTrip();
+  if (destinationSlug && !destination) return <NotFound />;
   if (query.isPending)
     return <Feedback title="Opening your destination guide…" />;
   if (query.isError && !query.data)
@@ -22,7 +28,8 @@ export function Component() {
       </Feedback>
     );
   const country = query.data?.find(
-    (item) => item.code === countryCode?.toUpperCase(),
+    (item) =>
+      item.code === (destination?.countryCode ?? countryCode?.toUpperCase()),
   );
   if (!country) return <NotFound />;
   const added = trip.stops.some((stop) => stop.code === country.code);
@@ -45,15 +52,20 @@ export function Component() {
     ],
   ];
   return (
-    <div className="detail-page">
+    <div className={`detail-page ${destination ? 'place-detail' : ''}`}>
       <Link className="back-link" to="/">
-        ← All destinations
+        ← Discover places
       </Link>
       <section className="destination-heading">
         <div>
-          <span className="eyebrow">{country.region} / Destination guide</span>
-          <h1>{country.name}</h1>
-          <p>A new place. A fresh perspective. Start with the essentials.</p>
+          <span className="eyebrow">
+            {country.region} / {destination ? country.name : 'Country guide'}
+          </span>
+          <h1>{destination?.name ?? country.name}</h1>
+          <p>
+            {destination?.description ??
+              'A fresh perspective. Start with the country essentials.'}
+          </p>
           <div className="actions">
             {added ? (
               <Link className="button" to="/trip">
@@ -61,7 +73,9 @@ export function Component() {
               </Link>
             ) : (
               <button onClick={() => trip.add(country)}>
-                Add to my trip +
+                {destination
+                  ? `Add ${country.name} to my trip +`
+                  : 'Add to my trip +'}
               </button>
             )}
             <FavouriteButton country={country} />
@@ -80,10 +94,29 @@ export function Component() {
           />
         )}
       </section>
+      {destination && (
+        <section
+          className="place-photo"
+          aria-label={`${destination.name} photograph`}
+        >
+          <DestinationVisual
+            destination={destination}
+            sizes="(max-width: 600px) calc(100vw - 40px), (max-width: 1320px) calc(100vw - 80px), 1240px"
+          />
+          <PhotoCredit destination={destination} />
+          <p className="muted">
+            {destination.locality} · Plans and favourites currently save the
+            country, {country.name}.
+          </p>
+        </section>
+      )}
       <div className="detail-columns">
         <section className="facts">
           <span className="eyebrow">Know before you go</span>
           <h2>The essentials</h2>
+          {destination && (
+            <p className="muted">Country information for {country.name}</p>
+          )}
           <dl>
             {facts.map(([label, value]) => (
               <div key={label}>
@@ -104,7 +137,10 @@ export function Component() {
             Country data: REST Countries / Conventus mirror
           </a>
         </section>
-        <WeatherPanel coordinates={country.coordinates} />
+        <WeatherPanel
+          coordinates={destination?.coordinates ?? country.coordinates}
+          locationName={destination?.name}
+        />
       </div>
     </div>
   );

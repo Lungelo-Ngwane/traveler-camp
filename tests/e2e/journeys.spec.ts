@@ -21,8 +21,8 @@ test('URL search, favourites, trip edits and reload persistence', async ({
   await expect(
     page.getByRole('heading', { name: 'A little further. A lot to discover.' }),
   ).toBeVisible();
-  await page.getByLabel('Search countries or capitals').fill('Tokyo');
-  await page.getByLabel('Search countries or capitals').press('Enter');
+  await page.getByLabel('Search places, countries or capitals').fill('Tokyo');
+  await page.getByLabel('Search places, countries or capitals').press('Enter');
   await expect(page).toHaveURL(/q=Tokyo/);
   await expect(
     page.getByRole('heading', { name: 'Japan', exact: true }),
@@ -70,6 +70,7 @@ test('country failure can recover, and weather failure leaves details usable', a
     route.fulfill({ json: countriesFixture }),
   );
   await page.getByRole('button', { name: 'Try again' }).click();
+  await page.locator('.country-directory > summary').click();
   await expect(
     page.getByRole('heading', { name: 'Japan', exact: true }),
   ).toBeVisible();
@@ -101,9 +102,9 @@ test('bookmarked filters, back navigation, itinerary ordering and removal', asyn
   ).toBeVisible();
   await page.getByRole('button', { name: 'Clear filters' }).click();
   await page.goBack();
-  await expect(page.getByLabel('Search countries or capitals')).toHaveValue(
-    'lisbon',
-  );
+  await expect(
+    page.getByLabel('Search places, countries or capitals'),
+  ).toHaveValue('lisbon');
   await page.goto('/destinations/JPN');
   await page.getByRole('button', { name: 'Add to my trip' }).click();
   await page.goto('/destinations/PRT');
@@ -123,5 +124,55 @@ test('bookmarked filters, back navigation, itinerary ordering and removal', asyn
   await page.reload();
   await expect(
     page.getByRole('heading', { name: 'Portugal', exact: true }),
+  ).toBeVisible();
+});
+
+test('photo-led place discovery, keyboard region filters and graceful missing images', async ({
+  page,
+}) => {
+  await page.route('**/destinations/tokyo-*.jpg', (route) =>
+    route.fulfill({ status: 404, body: '' }),
+  );
+  await page.goto('/');
+  await expect(
+    page.getByRole('heading', { name: 'Featured destinations' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Tokyo', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Japan', exact: true }),
+  ).not.toBeVisible();
+  await expect(
+    page.getByRole('img', {
+      name: 'Tokyo: illustrated landscape, photograph unavailable',
+    }),
+  ).toBeVisible();
+  const region = page.getByRole('button', { name: 'Europe', exact: true });
+  await region.focus();
+  await region.press('Enter');
+  await expect(page).toHaveURL(/region=Europe/);
+  await expect(
+    page.getByRole('heading', { name: 'Lisbon', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Tokyo', exact: true }),
+  ).toHaveCount(0);
+  await page.getByRole('button', { name: 'Clear filters' }).click();
+  await page.getByRole('link', { name: 'Explore Tokyo', exact: true }).focus();
+  await page
+    .getByRole('link', { name: 'Explore Tokyo', exact: true })
+    .press('Enter');
+  await expect(page).toHaveURL(/\/places\/tokyo$/);
+  await expect(
+    page.getByRole('heading', { name: 'Tokyo', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Model conditions near Tokyo.', { exact: false }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Add Japan to my trip' }).click();
+  await page.getByRole('link', { name: 'View in your trip' }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Japan', exact: true }),
   ).toBeVisible();
 });

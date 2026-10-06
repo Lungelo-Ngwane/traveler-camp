@@ -1,7 +1,9 @@
-import { useSearchParams } from 'react-router-dom';
+﻿import { useSearchParams } from 'react-router-dom';
 import { useCountries, filterCountries, regions, pageNumber } from './api';
 import { useFavourites } from '../favourites/context';
 import { CountryCard } from './CountryCard';
+import { DestinationCard } from './DestinationCard';
+import { filterDestinations } from './catalogue';
 import { Feedback, LoadingCards } from '../../components/Feedback';
 
 export function Discovery({
@@ -18,8 +20,12 @@ export function Discovery({
     codes,
     favouritesOnly,
   );
+  const places = filterDestinations(params);
   const pages = Math.max(1, Math.ceil(filtered.length / 12));
   const page = pageNumber(params, pages);
+  const hasFilters = ['q', 'region', 'sort', 'page'].some((key) =>
+    params.has(key),
+  );
   function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -32,10 +38,70 @@ export function Discovery({
     next.delete('page');
     setParams(next);
   }
+  function setRegion(region: string) {
+    const next = new URLSearchParams(params);
+    if (region) next.set('region', region);
+    else next.delete('region');
+    next.delete('page');
+    setParams(next);
+  }
+  function changePage(value: number) {
+    const next = new URLSearchParams(params);
+    next.set('page', String(value));
+    setParams(next);
+  }
+  const countryResults = (
+    <>
+      <div className="results-line">
+        <p role="status">
+          {filtered.length}{' '}
+          {filtered.length === 1 ? 'country guide' : 'country guides'}
+          {filtered.length > 0 && ` · Page ${page} of ${pages}`}
+        </p>
+      </div>
+      {filtered.length ? (
+        <div className="country-grid">
+          {filtered.slice((page - 1) * 12, page * 12).map((country) => (
+            <CountryCard key={country.code} country={country} />
+          ))}
+        </div>
+      ) : (
+        <Feedback
+          title={
+            favouritesOnly && !codes.length
+              ? 'Your someday list starts here'
+              : 'No countries found'
+          }
+        >
+          <p>
+            {favouritesOnly && !codes.length
+              ? 'Tap the heart on a place or country guide to save its country here.'
+              : 'Try a different country, capital, or region.'}
+          </p>
+        </Feedback>
+      )}
+      {pages > 1 && (
+        <nav className="pagination" aria-label="Country guide pages">
+          <button disabled={page === 1} onClick={() => changePage(page - 1)}>
+            ← Previous
+          </button>
+          <span>
+            {page} / {pages}
+          </span>
+          <button
+            disabled={page === pages}
+            onClick={() => changePage(page + 1)}
+          >
+            Next →
+          </button>
+        </nav>
+      )}
+    </>
+  );
   return (
     <>
       {!favouritesOnly && (
-        <section className="hero">
+        <section className="hero discovery-hero">
           <div className="hero-copy">
             <span className="eyebrow">For the curious at heart</span>
             <h1>
@@ -44,8 +110,8 @@ export function Discovery({
               <em>A lot to discover.</em>
             </h1>
             <p>
-              Find somewhere that moves you. Explore the world, keep your
-              favourites, and turn a little curiosity into your next journey.
+              Coastal mornings. City wanderings. Somewhere you haven’t been yet.
+              Find a place that moves you, then make it part of your journey.
             </p>
             <a className="button light" href="#explore">
               Find your next destination <span aria-hidden="true">↘</span>
@@ -69,15 +135,18 @@ export function Discovery({
             <span className="eyebrow">
               {favouritesOnly
                 ? 'Your personal shortlist'
-                : 'The world is wide open'}
+                : 'Follow your curiosity'}
             </span>
-            <h1 hidden={!favouritesOnly}>Saved for someday</h1>
-            {!favouritesOnly && <h2>Where will curiosity take you?</h2>}
+            {favouritesOnly ? (
+              <h1>Saved for someday</h1>
+            ) : (
+              <h2>Find your next somewhere.</h2>
+            )}
           </div>
           <p>
             {favouritesOnly
-              ? 'Places you want to come back to.'
-              : 'Country guides. Real information. Your next possibility.'}
+              ? 'Your saved countries, ready for a closer look.'
+              : 'A few places to inspire you. A whole world to explore.'}
           </p>
         </div>
         <form
@@ -87,12 +156,12 @@ export function Discovery({
           aria-label="Filter destinations"
         >
           <label className="search-label">
-            Search countries or capitals
+            Search places, countries or capitals
             <input
               type="search"
               name="q"
               defaultValue={params.get('q') ?? ''}
-              placeholder="Try Japan or Cape Town"
+              placeholder="Try Bali, Japan or Cape Town"
               maxLength={100}
             />
           </label>
@@ -113,7 +182,7 @@ export function Discovery({
             </select>
           </label>
           <label>
-            Sort by
+            Country sort
             <select
               name="sort"
               defaultValue={
@@ -126,6 +195,93 @@ export function Discovery({
           </label>
           <button type="submit">Explore</button>
         </form>
+        {hasFilters && (
+          <div className="active-filters">
+            <p>
+              Showing matches
+              {params.get('q') && (
+                <>
+                  {' '}
+                  for <strong>“{params.get('q')}”</strong>
+                </>
+              )}
+              {params.get('region') && <> in {params.get('region')}</>}
+            </p>
+            <button className="text-button" onClick={() => setParams({})}>
+              Clear filters
+            </button>
+          </div>
+        )}
+        {!favouritesOnly && (
+          <>
+            <section
+              className="featured-section"
+              aria-labelledby="featured-heading"
+            >
+              <div className="section-heading">
+                <div>
+                  <span className="eyebrow">
+                    A starting point, not a ranking
+                  </span>
+                  <h2 id="featured-heading">
+                    {hasFilters ? 'Places to explore' : 'Featured destinations'}
+                  </h2>
+                </div>
+                <p>
+                  {hasFilters
+                    ? `${places.length} curated ${places.length === 1 ? 'place' : 'places'} match your search.`
+                    : 'Six handpicked places. Find your own kind of adventure.'}
+                </p>
+              </div>
+              {places.length ? (
+                <div className="cards">
+                  {places.map((destination) => (
+                    <DestinationCard
+                      key={destination.slug}
+                      destination={destination}
+                      country={query.data?.find(
+                        (country) => country.code === destination.countryCode,
+                      )}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <Feedback title="No curated places match yet">
+                  <p>
+                    Our collection is small. Explore the country guides below
+                    for more possibilities.
+                  </p>
+                </Feedback>
+              )}
+            </section>
+            <section
+              className="region-section"
+              aria-labelledby="region-heading"
+            >
+              <h2 id="region-heading">Explore by region</h2>
+              <div className="region-options">
+                <button
+                  className="region-option"
+                  aria-pressed={!params.get('region')}
+                  onClick={() => setRegion('')}
+                >
+                  Everywhere
+                </button>
+                {regions.map((region) => (
+                  <button
+                    key={region}
+                    className="region-option"
+                    aria-pressed={params.get('region') === region}
+                    onClick={() => setRegion(region)}
+                  >
+                    {region}
+                    <span aria-hidden="true"> ↗</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
         {query.isPending ? (
           <LoadingCards />
         ) : query.isError && !query.data ? (
@@ -136,6 +292,7 @@ export function Discovery({
             }}
           >
             <p>{query.error.message}</p>
+            <p>Your curated places above are still available.</p>
           </Feedback>
         ) : (
           <>
@@ -152,65 +309,36 @@ export function Discovery({
                 </button>
               </p>
             )}
-            <div className="results-line">
-              <p role="status">
-                {filtered.length}{' '}
-                {filtered.length === 1 ? 'destination' : 'destinations'}
-                {filtered.length > 0 && ` · Page ${page} of ${pages}`}
-              </p>
-              {params.toString() && (
-                <button className="text-button" onClick={() => setParams({})}>
-                  Clear filters
-                </button>
-              )}
-            </div>
-            {filtered.length ? (
-              <div className="cards">
-                {filtered.slice((page - 1) * 12, page * 12).map((country) => (
-                  <CountryCard key={country.code} country={country} />
-                ))}
-              </div>
+            {favouritesOnly ? (
+              <div className="country-directory">{countryResults}</div>
             ) : (
-              <Feedback
-                title={
-                  favouritesOnly && !codes.length
-                    ? 'Your someday list starts here'
-                    : 'No destinations found'
-                }
+              <details
+                className="country-directory"
+                open={hasFilters}
+                key={params.toString()}
               >
-                <p>
-                  {favouritesOnly && !codes.length
-                    ? 'Tap the heart on any destination to keep it here.'
-                    : 'Try a different country, capital, or region.'}
-                </p>
-              </Feedback>
-            )}
-            {pages > 1 && (
-              <nav className="pagination" aria-label="Destination pages">
-                <button
-                  disabled={page === 1}
-                  onClick={() => {
-                    const next = new URLSearchParams(params);
-                    next.set('page', String(page - 1));
-                    setParams(next);
-                  }}
-                >
-                  ← Previous
-                </button>
-                <span>
-                  {page} / {pages}
-                </span>
-                <button
-                  disabled={page === pages}
-                  onClick={() => {
-                    const next = new URLSearchParams(params);
-                    next.set('page', String(page + 1));
-                    setParams(next);
-                  }}
-                >
-                  Next →
-                </button>
-              </nav>
+                <summary>
+                  <span>
+                    <span className="eyebrow">Go beyond the shortlist</span>
+                    <span className="directory-title">Explore the world</span>
+                    <span className="directory-description">
+                      {filtered.length} country guides · currencies, languages &
+                      the essentials
+                    </span>
+                  </span>
+                  <span className="directory-toggle" aria-hidden="true">
+                    +
+                  </span>
+                </summary>
+                <div className="directory-results">
+                  <p className="directory-intro">
+                    Country reference guides help you plan further. They are
+                    separate from our curated places; hearts save countries to
+                    your shortlist.
+                  </p>
+                  {countryResults}
+                </div>
+              </details>
             )}
           </>
         )}
