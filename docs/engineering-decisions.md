@@ -98,6 +98,20 @@ These decisions describe the implemented Roamly application. The original two Gi
 
 **Alternatives:** A design-system dependency, remote photo catalogue, manual vendor splitting, pervasive memoisation, or full list virtualisation.
 
-**Trade-offs:** SPA runtime libraries contribute an approximately 109 KB gzip entry bundle plus route chunks. Native image loading lacks automatic format negotiation and responsive variants. Cards use real flags and CSS artwork, rather than a per-country photographic collection.
+**Trade-offs:** SPA runtime libraries contribute an approximately 109 KB gzip entry bundle plus route chunks. Native image loading lacks automatic format negotiation. The original flag/CSS cards have since been replaced by the place photography strategy in decision 8, including responsive image variants; country reference guides retain small flags.
 
 **When I would reconsider it:** Measured interaction bottlenecks, slower-network requirements, a large catalogue, or a curated licensed photo library. Add responsive image variants, carefully selected prefetching, server pagination, and targeted memoisation based on profiling.
+
+## 8. Lead discovery with places, keep countries as reference
+
+**Context:** Flag heroes and oversized ISO codes made discovery resemble a directory. REST Countries provides geographic reference records, not a curated travel recommendation catalogue.
+
+**Decision:** Add a separate editorial `Destination` model and six named places joined to countries by `countryCode`. Lead the page with photograph-led place cards, URL-backed place/country search, region controls, and an expandable, compact country reference catalogue. Add `/places/:destinationSlug` guides while preserving existing country routes, saved favourites, and trip storage. Use locally served, licensed Pexels photography and an intentional CSS landscape fallback.
+
+**Why:** Place names and photographs make exploration concrete without pretending every country record is a destination recommendation. Country metadata still supports planning. Local media avoids API credentials, runtime availability/quotas, and an unnecessary backend. Image rights, credits, sizing, and the curation process are documented in [photography](photography.md).
+
+**Alternatives:** Live stock-photo search, country flags as hero fallback, randomly assigned landscape URLs, or replacing saved country identifiers with place slugs. These introduce rights/availability ambiguity, the wrong visual hierarchy, or incompatible persistence changes.
+
+**Trade-offs:** The editorial catalogue is deliberately small and manually maintained. Country sorting applies to reference guides, not editorial order. Existing hearts and trips remain country-based; labels and place guides explicitly explain that scope. Curated places and local images remain discoverable during a country API outage, but detailed country metadata still requires the existing service. Card weather is omitted to avoid a request per card or presenting country-coordinate weather as local. Place guides request weather at approximate place coordinates.
+
+**When I would reconsider it:** A larger city catalogue, multiple stops/favourites in the same country, editorial workflows, or richer local recommendations. Introduce versioned place persistence and managed media ingestion when those product requirements justify them; retain old country records with explicit migration semantics.

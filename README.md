@@ -8,8 +8,9 @@ The migration from Next.js is deliberate: the application relies on public brows
 
 ## Features
 
+- Discover six curated travel places with locally hosted destination photography, small flag metadata, and an expandable country catalogue.
 - Explore country guides backed by real public metadata, including flags, capitals, languages, currencies, population, time zones, and coordinates.
-- Search countries and capitals, filter regions, sort, and paginate. Submitted filters live in the URL and work with bookmarks and browser history.
+- Search places, countries and capitals, filter regions, and sort/paginate country guides. Submitted filters live in the URL and work with bookmarks and browser history.
 - Save favourites and return to a personal shortlist.
 - View modelled current weather with Celsius temperatures and km/h wind, independent loading, retry, and unavailable states.
 - Build an itinerary, edit dates and notes, reorder with keyboard-accessible buttons, remove stops, and view planned nights and calendar span.
@@ -22,7 +23,7 @@ Captured from the production preview with live country and weather APIs on 6 Oct
 
 ![Discovery on desktop](docs/screenshots/discovery-desktop.png)
 
-[Destination guide](docs/screenshots/destination-desktop.png) · [Trip planner](docs/screenshots/trip-desktop.png) · [Mobile discovery](docs/screenshots/discovery-mobile.png)
+[Place guide](docs/screenshots/place-desktop.png) · [Country guide](docs/screenshots/destination-desktop.png) · [Trip planner](docs/screenshots/trip-desktop.png) · [Mobile discovery](docs/screenshots/discovery-mobile.png)
 
 ## Architecture
 
@@ -43,7 +44,7 @@ src/
   styles.css                   Responsive CSS and visual identity
 ```
 
-React Router owns `/`, `/destinations/:countryCode`, `/favourites`, `/trip`, and the unmatched-route fallback. Route modules load on demand. Route errors have reload and home actions; navigation updates the document title and moves focus to the main landmark. No Next.js imports, Server Components, server routes, or framework hydration remain. All components run in the browser.
+React Router owns `/`, `/places/:destinationSlug`, `/destinations/:countryCode`, `/favourites`, `/trip`, and the unmatched-route fallback. Route modules load on demand. Route errors have reload and home actions; navigation updates the document title and moves focus to the main landmark. No Next.js imports, Server Components, server routes, or framework hydration remain. All components run in the browser.
 
 ### State ownership
 
@@ -62,7 +63,7 @@ There is no Redux. Two small shared collections do not justify a store, middlewa
 
 Country and weather adapters receive `unknown`, validate essential fields, and map external shapes to domain types. Invalid optional metadata degrades to missing values; unusable country records are discarded, and an entirely unusable payload is an error. Weather unit mismatches or malformed essential fields are rejected. API calls have a 15-second timeout, cancellation, HTTP error mapping, and one retry.
 
-The single country query is fresh for 24 hours and retained for 24 hours when inactive. Discovery and detail pages share it, so opening a guide usually needs no second country request. The bounded dataset contains around 250 countries/territories; only 12 cards render per page. Weather is keyed by coordinates, fresh for 10 minutes, and retained for 30 minutes when inactive. Stale active queries can refetch on focus/reconnect. Query caching is in memory, not persistent/offline storage; HTTP caching still follows upstream headers.
+The single country query is fresh for 24 hours and retained for 24 hours when inactive. Discovery and detail pages share it, so opening a guide usually needs no second country request. The bounded reference dataset contains around 250 countries/territories; only 12 compact country rows render per page, in an expandable catalogue. A separate editorial collection of six places leads discovery; it is not inferred from country data. Weather is keyed by coordinates, fresh for 10 minutes, and retained for 30 minutes when inactive. Stale active queries can refetch on focus/reconnect. Query caching is in memory, not persistent/offline storage; HTTP caching still follows upstream headers.
 
 Country errors show a retry action. A background failure can show cached data. Weather has a separate error state so the guide stays usable. Weather is fetched after country coordinates are known; that dependency is necessary, and no weather requests run for listing cards.
 
@@ -84,9 +85,13 @@ Flag images come from HTTPS URLs in country metadata (currently FlagCDN). Metada
 
 ### Weather
 
-[Open-Meteo forecast documentation](https://open-meteo.com/en/docs) defines the keyless `/v1/forecast` endpoint and current `temperature_2m`, `wind_speed_10m`, and `weather_code` variables. Roamly requests explicit units and GMT timestamps at the country coordinates. This is a country-location weather model estimate, not necessarily capital-city conditions.
+[Open-Meteo forecast documentation](https://open-meteo.com/en/docs) defines the keyless `/v1/forecast` endpoint and current `temperature_2m`, `wind_speed_10m`, and `weather_code` variables. Roamly requests explicit units and GMT timestamps at the country coordinates. Country guides use country coordinates; curated place guides use approximate place coordinates. These are model estimates, not observations or exact-address forecasts.
 
 The [free API terms](https://open-meteo.com/en/pricing) apply to noncommercial use, with 10,000 daily calls, 5,000 hourly calls, and 600 calls per minute and no uptime guarantee. Attribution links appear in the UI. Commercial use needs the appropriate licence and a different deployment boundary for any private key. No API keys or environment variables are needed for this portfolio application.
+
+### Destination photography
+
+Six curated Pexels photographs are downloaded and served locally in 480/960 px variants, with responsive image selection, credits, and an intentional illustration if a photo fails. No photography API, key, backend, or runtime photo CDN dependency is required. See [photography sources and rights](docs/photography.md). Place and country models are separate; existing favourites and trips continue to save countries.
 
 ## Tech stack
 
@@ -150,7 +155,7 @@ On Linux CI, install Chromium system dependencies with `npx playwright install -
 
 Unit/interaction tests exercise real mappings, invalid data, API errors, URL filtering, pagination bounds, favourite toggling, corrupt/inaccessible storage, trip dates, and immutability. Browser tests intercept upstream APIs with explicitly labelled fixtures for deterministic discovery, retries, weather isolation, favourite persistence, trip editing/reordering/removal, reloads, bookmarks, history, unavailable storage, unknown routes, and axe WCAG checks. Tests do not depend on live weather or create fake data in the application. A separate live-browser smoke check verified the real APIs and generated screenshots.
 
-Validation on 6 October 2026: clean `npm ci`, formatting, lint, strict typecheck, 19 unit/interaction tests, production build, 10 desktop/mobile browser tests, and `npm audit` all passed. The audit reported zero vulnerabilities. The production entry is approximately 109 KB gzip; lazy routes load separately. Repository scans found no Next.js imports/dependency, environment files, unused public assets, or common secret patterns.
+Validation on 6 October 2026: clean `npm ci`, formatting, lint, strict typecheck, 22 unit/interaction tests, production build, 12 desktop/mobile browser tests, and `npm audit` all passed. The audit reported zero vulnerabilities. The production entry is approximately 109 KB gzip; lazy routes load separately. Repository scans found no Next.js imports/dependency, environment files, unused public assets, or common secret patterns.
 
 In an execution sandbox on Windows, Playwright must be allowed to terminate its own preview process tree. Restricted process permissions can delay teardown even when assertions pass; normal local execution and the Linux CI workflow do not need that sandbox permission.
 
@@ -168,7 +173,7 @@ The [decision log](docs/engineering-decisions.md) covers Next.js-to-Vite migrati
 
 - Client-side rendering has limited route-specific SEO/social previews and requires JavaScript. No SSR, PWA/offline guarantees, authentication, booking, or cross-device sync.
 - Country API availability and data freshness depend on a public mirror. Browser caching cannot repair an upstream outage after a fresh load.
-- Weather uses country coordinates; city geocoding and forecast ranges are future extensions.
+- Country guides use country coordinates; place guides use curated approximate coordinates. City geocoding and forecast ranges are future extensions.
 - One itinerary, one stop per country, last-writer-wins browser storage; no conflict resolution or export/import. Unsaved editor drafts are discarded when leaving the route.
 - Dates may overlap and leave gaps. The summary explains the distinction between summed nights and overall calendar span; it does not validate travel feasibility.
 - Browser automation covers Chromium desktop/mobile viewports, not real devices, WebKit, or Firefox. Asset provenance is inherited from the original repository; licensing should be confirmed before commercial publication.
