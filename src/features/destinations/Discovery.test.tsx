@@ -4,9 +4,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { expect, it } from 'vitest';
 import { countriesFixture } from '../../../tests/fixtures';
-import { FavouritesProvider } from '../favourites/Provider';
+import { FavouritesProvider } from '../favourites/FavouritesProvider';
 import { Discovery } from './Discovery';
-import { parseCountries } from './api';
+import { parseCountries } from '../countries/api';
 it('submits labelled keyboard search and toggles an accessible favourite', async () => {
   window.localStorage.clear();
   const client = new QueryClient();

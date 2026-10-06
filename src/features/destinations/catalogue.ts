@@ -1,5 +1,5 @@
-﻿import { regions } from './api';
-import type { Destination } from '../../lib/models';
+import { regions } from '../countries/filters';
+import type { Destination } from '../../domain/destination';
 export const destinations: Destination[] = [
   {
     slug: 'cape-town',

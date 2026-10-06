@@ -1,8 +1,8 @@
 import { Link, useParams } from 'react-router-dom';
-import { useCountries } from './api';
+import { useCountries } from '../countries/api';
 import { destinations } from './catalogue';
 import { DestinationVisual, PhotoCredit } from './DestinationVisual';
-import { Feedback, NotFound } from '../../components/Feedback';
+import { Feedback, NotFound } from '../../shared/ui/Feedback';
 import { FavouriteButton } from './CountryCard';
 import { useTrip } from '../trip/context';
 import { WeatherPanel } from '../weather/WeatherPanel';

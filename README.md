@@ -29,22 +29,25 @@ Captured from the production preview with live country and weather APIs on 6 Oct
 
 ```text
 src/
-  main.tsx                     React root, query client, providers, lazy routes
-  components/                  Layout, loading/empty/error feedback
+  main.tsx                     React bootstrap
+  app/                         Router, provider composition, layout, global styles
+  domain/                      Framework-independent country, destination and trip types
   features/
-    destinations/              Country adapter, discovery, cards, details
-    weather/                   Weather adapter and independently recoverable UI
-    favourites/                Focused shared state and shortlist route
-    trip/                      Focused shared state, editing, pure calculations
-  lib/
-    api.ts                     Unknown-data helpers, timeout, HTTP error mapping
-    models.ts                  Application domain types
-    storage.ts                 Versioned repository and runtime validation
-    useRepository.ts           React integration and cross-tab storage events
-  styles.css                   Responsive CSS and visual identity
+    countries/                 Country API adapter and pure URL filtering
+    destinations/              Curated catalogue, discovery, cards and guide routes
+    weather/                   Weather API adapter and recoverable panel
+    favourites/                Shortlist route, focused Context and repository
+    trip/                      Planner route, focused Context, repository and calculations
+  shared/
+    http.ts                    Fetch timeout, cancellation and unknown-data helpers
+    date.ts                    Calendar date validation
+    persistence/               Generic versioned repository and React integration
+    ui/                        Shared loading, empty and error feedback
 ```
 
 React Router owns `/`, `/places/:destinationSlug`, `/destinations/:countryCode`, `/favourites`, `/trip`, and the unmatched-route fallback. Route modules load on demand. Route errors have reload and home actions; navigation updates the document title and moves focus to the main landmark. No Next.js imports, Server Components, server routes, or framework hydration remain. All components run in the browser.
+
+See [architecture](docs/architecture.md) for dependency boundaries and placement rules.
 
 ### State ownership
 

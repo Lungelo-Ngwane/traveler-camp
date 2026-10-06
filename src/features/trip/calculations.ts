@@ -1,5 +1,5 @@
-import type { TripStop } from '../../lib/models';
-import { validDate } from '../../lib/storage';
+import type { TripStop } from '../../domain/trip';
+import { validDate } from '../../shared/date';
 export function nights(arrival: string, departure: string): number {
   return validDate(arrival) && validDate(departure) && departure >= arrival
     ? (Date.parse(departure) - Date.parse(arrival)) / 86400000

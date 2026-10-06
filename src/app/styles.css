@@ -300,11 +300,6 @@ textarea {
 .text-button:hover {
   background: transparent;
 }
-.cards {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 25px;
-}
 .favourite {
   border: 1px solid #dce1d6;
   background: white;
@@ -609,9 +604,6 @@ footer span {
   .section-heading p {
     max-width: none;
   }
-  .cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .filters {
     flex-wrap: wrap;
   }
@@ -691,10 +683,6 @@ footer span {
   }
   .filters button {
     width: 100%;
-  }
-  .cards {
-    grid-template-columns: 1fr;
-    gap: 20px;
   }
 
   .destination-heading {

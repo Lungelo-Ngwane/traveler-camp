@@ -1,11 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import {
-  createRepository,
-  parseFavourites,
-  parseTrip,
-  validDate,
-} from './storage';
-import type { StoragePort } from './storage';
+import { createRepository } from './repository';
+import { parseFavourites } from '../../features/favourites/repository';
+import { parseTrip } from '../../features/trip/repository';
+import { validDate } from '../date';
+import type { StoragePort } from './repository';
 const stop = {
   id: 'one',
   code: 'JPN',

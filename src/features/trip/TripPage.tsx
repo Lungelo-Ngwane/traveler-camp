@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import type { TripStop } from '../../lib/models';
-import { validDate } from '../../lib/storage';
-import { Feedback } from '../../components/Feedback';
+import type { TripStop } from '../../domain/trip';
+import { validDate } from '../../shared/date';
+import { Feedback } from '../../shared/ui/Feedback';
 import { useTrip } from './context';
 import { nights, tripSummary } from './calculations';
 function StopEditor({

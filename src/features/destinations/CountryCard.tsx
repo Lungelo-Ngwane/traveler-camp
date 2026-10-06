@@ -1,5 +1,5 @@
-﻿import { Link } from 'react-router-dom';
-import type { Country } from '../../lib/models';
+import { Link } from 'react-router-dom';
+import type { Country } from '../../domain/country';
 import { useFavourites } from '../favourites/context';
 export function FavouriteButton({
   country,

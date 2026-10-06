@@ -1,10 +1,11 @@
-﻿import { useSearchParams } from 'react-router-dom';
-import { useCountries, filterCountries, regions, pageNumber } from './api';
+import { useSearchParams } from 'react-router-dom';
+import { useCountries } from '../countries/api';
+import { filterCountries, regions, pageNumber } from '../countries/filters';
 import { useFavourites } from '../favourites/context';
 import { CountryCard } from './CountryCard';
 import { DestinationCarousel } from './DestinationCarousel';
 import { filterDestinations } from './catalogue';
-import { Feedback, LoadingCards } from '../../components/Feedback';
+import { Feedback, LoadingCards } from '../../shared/ui/Feedback';
 
 export function Discovery({
   favouritesOnly = false,

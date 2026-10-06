@@ -1,5 +1,6 @@
-﻿import { Link } from 'react-router-dom';
-import type { Country, Destination } from '../../lib/models';
+import { Link } from 'react-router-dom';
+import type { Country } from '../../domain/country';
+import type { Destination } from '../../domain/destination';
 import { FavouriteButton } from './CountryCard';
 import { DestinationVisual, PhotoCredit } from './DestinationVisual';
 export function DestinationCard({

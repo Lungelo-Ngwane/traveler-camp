@@ -1,5 +1,6 @@
-﻿import { useEffect, useId, useRef, useState } from 'react';
-import type { Country, Destination } from '../../lib/models';
+import { useEffect, useId, useRef, useState } from 'react';
+import type { Country } from '../../domain/country';
+import type { Destination } from '../../domain/destination';
 import { DestinationCard } from './DestinationCard';
 
 export function DestinationCarousel({

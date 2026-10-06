@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { parseTrip, tripRepository } from '../../lib/storage';
-import { useRepository } from '../../lib/useRepository';
+import { parseTrip, tripRepository } from './repository';
+import { useRepository } from '../../shared/persistence/useRepository';
 import { TripContext } from './context';
 import { moveStop } from './calculations';
 export function TripProvider({ children }: { children: ReactNode }) {

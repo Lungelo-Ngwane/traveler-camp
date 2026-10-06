@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { ApiError, fetchJson, finite, record } from '../../lib/api';
+import { ApiError, fetchJson, finite, record } from '../../shared/http';
 export interface Weather {
   temperature: number;
   wind: number;

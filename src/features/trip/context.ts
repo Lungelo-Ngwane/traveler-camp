@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react';
-import type { Country, TripStop } from '../../lib/models';
+import type { Country } from '../../domain/country';
+import type { TripStop } from '../../domain/trip';
 export interface TripState {
   stops: TripStop[];
   warning: string;

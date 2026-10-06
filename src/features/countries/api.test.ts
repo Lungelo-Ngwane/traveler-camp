@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { countriesFixture } from '../../../tests/fixtures';
-import { parseCountries, filterCountries, pageNumber } from './api';
-import { fetchJson } from '../../lib/api';
+import { parseCountries } from './api';
+import { filterCountries, pageNumber } from './filters';
+import { fetchJson } from '../../shared/http';
 describe('country boundary', () => {
   it('maps response fields to domain data and discards invalid rows', () => {
     const data = parseCountries([

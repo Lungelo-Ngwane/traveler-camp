@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { Repository } from './storage';
+import type { Repository } from './repository';
 export function useRepository<T>(repository: Repository<T>) {
   const [snapshot, setSnapshot] = useState(() => repository.load());
   useEffect(() => {

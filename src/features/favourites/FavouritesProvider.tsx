@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { favouritesRepository } from '../../lib/storage';
-import { useRepository } from '../../lib/useRepository';
+import { favouritesRepository } from './repository';
+import { useRepository } from '../../shared/persistence/useRepository';
 import { FavouritesContext } from './context';
 export function FavouritesProvider({ children }: { children: ReactNode }) {
   const { value: codes, warning, update } = useRepository(favouritesRepository);

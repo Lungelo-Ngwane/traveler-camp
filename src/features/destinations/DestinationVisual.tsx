@@ -1,5 +1,5 @@
-﻿import { useState } from 'react';
-import type { Destination } from '../../lib/models';
+import { useState } from 'react';
+import type { Destination } from '../../domain/destination';
 export function DestinationVisual({
   destination,
   sizes = '(max-width: 600px) calc(100vw - 40px), (max-width: 900px) calc((100vw - 105px) / 2), 400px',
