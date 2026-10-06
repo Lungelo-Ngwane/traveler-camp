@@ -2,7 +2,7 @@
 import { useCountries, filterCountries, regions, pageNumber } from './api';
 import { useFavourites } from '../favourites/context';
 import { CountryCard } from './CountryCard';
-import { DestinationCard } from './DestinationCard';
+import { DestinationCarousel } from './DestinationCarousel';
 import { filterDestinations } from './catalogue';
 import { Feedback, LoadingCards } from '../../components/Feedback';
 
@@ -234,17 +234,11 @@ export function Discovery({
                 </p>
               </div>
               {places.length ? (
-                <div className="cards">
-                  {places.map((destination) => (
-                    <DestinationCard
-                      key={destination.slug}
-                      destination={destination}
-                      country={query.data?.find(
-                        (country) => country.code === destination.countryCode,
-                      )}
-                    />
-                  ))}
-                </div>
+                <DestinationCarousel
+                  key={params.toString()}
+                  destinations={places}
+                  countries={query.data}
+                />
               ) : (
                 <Feedback title="No curated places match yet">
                   <p>
