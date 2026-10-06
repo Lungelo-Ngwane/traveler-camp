@@ -1,0 +1,47 @@
+export const countriesFixture = [
+  {
+    cca3: 'JPN',
+    name: { common: 'Japan' },
+    capital: ['Tokyo'],
+    region: 'Asia',
+    population: 125000000,
+    latlng: [36, 138],
+    languages: { jpn: 'Japanese' },
+    currencies: { JPY: { name: 'Japanese yen' } },
+    timezones: ['UTC+09:00'],
+    flags: { svg: 'https://flagcdn.com/jp.svg' },
+  },
+  {
+    cca3: 'ZAF',
+    name: { common: 'South Africa' },
+    capital: ['Pretoria', 'Cape Town', 'Bloemfontein'],
+    region: 'Africa',
+    population: 60000000,
+    latlng: [-29, 24],
+    languages: { eng: 'English', zul: 'Zulu' },
+    currencies: { ZAR: { name: 'South African rand' } },
+    timezones: ['UTC+02:00'],
+    flags: { svg: 'https://flagcdn.com/za.svg' },
+  },
+  {
+    cca3: 'PRT',
+    name: { common: 'Portugal' },
+    capital: ['Lisbon'],
+    region: 'Europe',
+    population: 10000000,
+    latlng: [39.5, -8],
+    languages: { por: 'Portuguese' },
+    currencies: { EUR: { name: 'Euro' } },
+    timezones: ['UTC', 'UTC-01:00'],
+    flags: { svg: 'https://flagcdn.com/pt.svg' },
+  },
+];
+export const weatherFixture = {
+  current: {
+    temperature_2m: 22.5,
+    wind_speed_10m: 8,
+    weather_code: 2,
+    time: '2026-10-06T12:00',
+  },
+  current_units: { temperature_2m: '°C', wind_speed_10m: 'km/h' },
+};
