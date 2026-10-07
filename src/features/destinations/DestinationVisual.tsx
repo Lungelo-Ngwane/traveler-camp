@@ -7,8 +7,9 @@ export function DestinationVisual({
   destination: Destination;
   sizes?: string;
 }) {
-  const [failed, setFailed] = useState(false);
+  const [failedPath, setFailedPath] = useState<string | null>(null);
   const photo = destination.photo;
+  const failed = photo?.path === failedPath;
   return (
     <div
       className={`destination-visual ${failed || !photo ? 'visual-fallback' : ''}`}
@@ -24,7 +25,7 @@ export function DestinationVisual({
           loading="lazy"
           decoding="async"
           style={{ objectPosition: photo.position }}
-          onError={() => setFailed(true)}
+          onError={() => setFailedPath(photo.path)}
         />
       ) : (
         <div

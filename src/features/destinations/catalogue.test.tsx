@@ -45,3 +45,15 @@ describe('curated travel discovery', () => {
     ).toBeInTheDocument();
   });
 });
+
+it('does not carry a failed photograph into another destination', () => {
+  const first = destinations[0]!;
+  const second = destinations[1]!;
+  const { rerender } = render(<DestinationVisual destination={first} />);
+  fireEvent.error(screen.getByRole('img', { name: first.photo!.alt }));
+  rerender(<DestinationVisual destination={second} />);
+  expect(screen.getByRole('img', { name: second.photo!.alt })).toHaveAttribute(
+    'src',
+    '/destinations/tokyo-480.jpg',
+  );
+});

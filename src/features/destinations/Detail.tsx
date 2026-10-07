@@ -56,6 +56,19 @@ export function Component() {
       <Link className="back-link" to="/">
         ← Discover places
       </Link>
+      {query.isError && (
+        <p role="status">
+          Country refresh failed; showing previously loaded information.{' '}
+          <button
+            className="text-button"
+            onClick={() => {
+              void query.refetch();
+            }}
+          >
+            Retry country information
+          </button>
+        </p>
+      )}
       <section className="destination-heading">
         <div>
           <span className="eyebrow">
