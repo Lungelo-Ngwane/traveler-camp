@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { countriesFixture, weatherFixture } from '../fixtures';
-test.beforeEach(async ({ page }) => {
-  await page.route('https://restcountries.conventus.de/**', (route) =>
+test.beforeEach(async ({ context }) => {
+  await context.route('https://restcountries.conventus.de/**', (route) =>
     route.fulfill({ json: countriesFixture }),
   );
-  await page.route('https://api.open-meteo.com/**', (route) =>
+  await context.route('https://api.open-meteo.com/**', (route) =>
     route.fulfill({ json: weatherFixture }),
   );
-  await page.route('https://flagcdn.com/**', (route) =>
+  await context.route('https://flagcdn.com/**', (route) =>
     route.fulfill({
       contentType: 'image/svg+xml',
       body: '<svg xmlns="http://www.w3.org/2000/svg" width="72" height="48"><rect width="72" height="48" fill="white"/><circle cx="36" cy="24" r="12" fill="red"/></svg>',
@@ -175,4 +175,92 @@ test('photo-led place discovery, keyboard region filters and graceful missing im
   await expect(
     page.getByRole('heading', { name: 'Japan', exact: true }),
   ).toBeVisible();
+});
+
+test('carousel controls and keyboard navigation respect bounds and retain card actions', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const track = page.getByRole('list', { name: 'Destination cards' });
+  const previous = page.getByRole('button', { name: 'Previous destinations' });
+  const next = page.getByRole('button', { name: 'Next destinations' });
+  await expect(previous).toBeDisabled();
+  await expect(next).toBeEnabled();
+  await next.click();
+  await expect
+    .poll(() => track.evaluate((element) => element.scrollLeft))
+    .toBeGreaterThan(0);
+  await track.focus();
+  await track.press('End');
+  await expect(next).toBeDisabled();
+  await track.press('Home');
+  await expect(previous).toBeDisabled();
+  await track.press('ArrowRight');
+  await expect(previous).toBeEnabled();
+  await track.press('ArrowLeft');
+  await expect(previous).toBeDisabled();
+  const favourite = page.getByRole('button', {
+    name: 'Save South Africa from Cape Town',
+    exact: true,
+  });
+  await favourite.focus();
+  await favourite.press('Space');
+  await expect(
+    page.getByRole('button', {
+      name: 'Unsave South Africa from Cape Town',
+      exact: true,
+    }),
+  ).toHaveAttribute('aria-pressed', 'true');
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});
+
+test('saved collections synchronize across tabs and reject malformed stored data', async ({
+  page,
+  context,
+}) => {
+  await page.goto('/destinations/JPN');
+  const second = await context.newPage();
+  try {
+    await second.goto('/favourites');
+    await page.getByRole('button', { name: 'Save Japan', exact: true }).click();
+    await expect(
+      second.getByRole('button', { name: 'Unsave Japan', exact: true }),
+    ).toBeVisible();
+    await second.goto('/trip');
+    await expect(
+      second.getByRole('heading', { name: 'Every journey starts somewhere' }),
+    ).toBeVisible();
+    await page.getByRole('button', { name: 'Add to my trip' }).click();
+    await expect(
+      second.getByRole('heading', { name: 'Japan', exact: true }),
+    ).toBeVisible();
+    await page.evaluate(() =>
+      localStorage.setItem('roamly:trip:v1', '{invalid'),
+    );
+    await expect(
+      second.getByRole('heading', { name: 'Every journey starts somewhere' }),
+    ).toBeVisible();
+    await expect(
+      second.getByText('Saved data could not be loaded.', { exact: false }),
+    ).toBeVisible();
+    await second.reload();
+    await expect(
+      second.getByRole('heading', { name: 'Every journey starts somewhere' }),
+    ).toBeVisible();
+    expect(
+      await second.evaluate(() => localStorage.getItem('roamly:trip:v1')),
+    ).toBe('{invalid');
+    await page.evaluate(() => localStorage.clear());
+    await second.goto('/favourites');
+    await expect(
+      second.getByRole('heading', { name: 'Your someday list starts here' }),
+    ).toBeVisible();
+  } finally {
+    await second.close();
+  }
 });
