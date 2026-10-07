@@ -4,6 +4,12 @@ export function useRepository<T>(repository: Repository<T>) {
   const [snapshot, setSnapshot] = useState(() => repository.load());
   useEffect(() => {
     const receive = (event: StorageEvent) => {
+      // sessionStorage events from same-origin frames must not replace local plans.
+      try {
+        if (event.storageArea !== window.localStorage) return;
+      } catch {
+        return;
+      }
       if (event.key === repository.key || event.key === null)
         setSnapshot(repository.load());
     };

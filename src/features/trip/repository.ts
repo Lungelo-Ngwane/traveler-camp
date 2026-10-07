@@ -19,6 +19,7 @@ export function parseTrip(value: unknown): TripStop[] {
       typeof stop.departure !== 'string' ||
       (stop.arrival !== '' && !validDate(stop.arrival)) ||
       (stop.departure !== '' && !validDate(stop.departure)) ||
+      (stop.departure !== '' && stop.arrival === '') ||
       (stop.arrival && stop.departure && stop.departure < stop.arrival)
     )
       throw new Error('Invalid itinerary stop');

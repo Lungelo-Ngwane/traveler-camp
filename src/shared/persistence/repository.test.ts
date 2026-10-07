@@ -47,6 +47,7 @@ describe('versioned persistence', () => {
   });
   it('validates stored trip dates, duplicate stops and favourites', () => {
     expect(() => parseTrip([stop, stop])).toThrow();
+    expect(() => parseTrip([{ ...stop, arrival: '' }])).toThrow();
     expect(() => parseTrip([{ ...stop, departure: '2026-10-01' }])).toThrow();
     expect(() => parseFavourites(['not-a-code'])).toThrow();
     expect(parseFavourites(['JPN', 'JPN'])).toEqual(['JPN']);
