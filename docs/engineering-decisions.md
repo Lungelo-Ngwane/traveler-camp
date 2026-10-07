@@ -1,10 +1,10 @@
 # Engineering decisions
 
-These decisions describe the implemented Roamly application. The original two Git commits remain intact; interactive features and the migration are new work.
+These decisions describe the implemented Roamly application and the trade-offs behind it.
 
 ## 1. Migrate Next.js to React, Vite, and TypeScript
 
-**Context:** The original Next.js 14.1 project rendered a static camping landing page. The new product uses browser-accessible public data and browser-local trip plans. The explicit project objective is to demonstrate React fundamentals.
+**Context:** The original Next.js 14.1 project rendered a static camping landing page. The new product uses browser-accessible public data and browser-local trip plans. It does not currently need server-owned data or server rendering.
 
 **Decision:** Replace Next.js routing, layout, metadata, image components, configuration, and dependency with a Vite-built React SPA, strict TypeScript, and React Router. Retain the original photograph as a compressed JPEG and evolve the green palette into a new Roamly identity.
 
@@ -36,11 +36,11 @@ These decisions describe the implemented Roamly application. The original two Gi
 
 **Decision:** Use the verified public mirror with ten selected fields and the documented Open-Meteo forecast endpoint. Keep all third-party requests and response mapping in feature adapters. Treat payloads as `unknown` and validate before returning domain objects. Fetch directly without a proxy.
 
-**Why:** No private secrets are required or exposed. Country metadata remains independent from provider-specific fields. Weather errors and unit mismatches cannot silently become plausible temperatures. Reusing country coordinates avoids hardcoded city mappings or a second geocoding service.
+**Why:** No private secrets are required or exposed. Country metadata remains independent from provider-specific fields. Weather errors and unit mismatches cannot silently become plausible temperatures. Reusing country coordinates avoids hardcoded city mappings on country guides or a second geocoding service. Place guides use separately curated coordinates.
 
 **Alternatives:** Authenticated REST Countries v5 through a backend, another licensed provider, a checked-in country snapshot, or a proxy around public APIs. A proxy alone adds infrastructure without making upstream availability better.
 
-**Trade-offs:** The mirror lacks a promised SLA and published numeric quota, and either API can fail. Countries/territories are discovery entries, not city-level recommendations. Unusable country rows are dropped while valid ones remain; a wholly unusable response fails. Optional fields display as missing, unsafe flag URLs are omitted, and weather is model output at country coordinates rather than a capital forecast. Open-Meteo free usage has noncommercial and rate-limit restrictions, with attribution visible in the UI.
+**Trade-offs:** The mirror lacks a promised SLA and published numeric quota, and either API can fail. Countries/territories are reference guides, distinct from the curated place recommendations. Unusable country rows are dropped while valid ones remain; a wholly unusable response fails. Optional fields display as missing, unsafe flag URLs are omitted, and weather is model output at country coordinates rather than a capital forecast. Open-Meteo free usage has noncommercial and rate-limit restrictions, with attribution visible in the UI.
 
 **When I would reconsider it:** Commercial deployment, provider instability, guaranteed freshness, official travel advice, city forecasts, or a provider that needs secrets. Add a secure server boundary only for real server responsibilities, including secret storage, rate limiting, and abuse controls.
 
@@ -78,13 +78,13 @@ These decisions describe the implemented Roamly application. The original two Gi
 
 **Context:** Upstream failures, stale URLs, date errors, and storage failures are more likely to break the product than static markup differences.
 
-**Decision:** Vitest tests adapters, URL filtering, persistence, date calculations, and favourite interactions. Testing Library drives labelled form interaction. Playwright runs critical journeys against the built Vite app in desktop/mobile Chromium, intercepts public API requests with test-only fixtures, and runs axe WCAG checks on discovery and planning. A separate live browser check verifies real upstream integration. A single validation script and Linux CI workflow compose checks.
+**Decision:** Vitest tests adapters, URL filtering, persistence, date calculations, and favourite interactions. Testing Library drives labelled form interaction. Playwright runs critical journeys against the built Vite app in desktop/mobile Chromium, intercepts public API requests with test-only fixtures, and runs axe WCAG checks on discovery and planning. Live upstream checks are separate from the deterministic suite. A single validation script and Linux CI workflow compose checks.
 
 **Why:** Deterministic fixtures make failure and recovery reproducible without tying CI to today's weather or mirror uptime. Domain tests catch malformed external and stored data. Production-build browser tests exercise routing, chunk loading, persistence, and accessible controls together.
 
 **Alternatives:** Snapshots, coverage targets, live-only E2E, or unit tests alone. None offers sufficient confidence in these boundary behaviours.
 
-**Trade-offs:** Chromium viewport coverage is not real-device or multi-engine coverage. Automated axe checks do not prove full accessibility. The hosted workflow is added but has not run because the branch has not been pushed. Windows sandbox process restrictions can obstruct Playwright server teardown; the suite passed with the required process permission.
+**Trade-offs:** Chromium viewport coverage is not real-device or multi-engine coverage. Automated axe checks do not prove full accessibility.
 
 **When I would reconsider it:** Broader browser/device audience, multilingual layouts, richer keyboard patterns, or commercial service requirements. Add WebKit/Firefox, manual screen-reader review, contract monitoring, and service-level checks according to risk.
 
@@ -94,13 +94,13 @@ These decisions describe the implemented Roamly application. The original two Gi
 
 **Decision:** Remove unused marketing assets/dependencies, convert the retained 1.1 MB PNG to a 158 KB JPEG, use system fonts, lazy route modules, lazy flag thumbnails, twelve-card pagination, and simple CSS. Keep date calculations and filtering straightforward without indiscriminate memoisation.
 
-**Why:** Reducing bytes and rendered nodes gives concrete benefits before adding clever abstractions. No third-party font request blocks the page. The application ships no fabricated reviews, download claims, or destination photographs presented as factual locations.
+**Why:** Reducing bytes and rendered nodes gives concrete benefits before adding clever abstractions. No third-party font request blocks the page. The application ships no fabricated reviews or download claims. Curated destination photo sources are documented in decision 8.
 
 **Alternatives:** A design-system dependency, remote photo catalogue, manual vendor splitting, pervasive memoisation, or full list virtualisation.
 
 **Trade-offs:** SPA runtime libraries contribute an approximately 109 KB gzip entry bundle plus route chunks. Native image loading lacks automatic format negotiation. The original flag/CSS cards have since been replaced by the place photography strategy in decision 8, including responsive image variants; country reference guides retain small flags.
 
-**When I would reconsider it:** Measured interaction bottlenecks, slower-network requirements, a large catalogue, or a curated licensed photo library. Add responsive image variants, carefully selected prefetching, server pagination, and targeted memoisation based on profiling.
+**When I would reconsider it:** Measured interaction bottlenecks, slower-network requirements, a large catalogue, or a curated licensed photo library. Consider additional image formats, carefully selected prefetching, server pagination, and targeted memoisation based on profiling.
 
 ## 8. Lead discovery with places, keep countries as reference
 

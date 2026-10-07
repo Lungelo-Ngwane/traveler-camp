@@ -2,13 +2,13 @@
 
 ## Overview
 
-Roamly is a travel discovery and local trip-planning application built with React, Vite, and strict TypeScript. It evolves this repository's original static camping landing page into an interactive product while preserving its Git history, green visual direction, and original camping photograph.
+Roamly is a travel discovery and local trip-planning application built with React, Vite, and strict TypeScript. It evolves this repository's original static camping landing page into an interactive product while retaining its green visual direction and camping photograph.
 
-The migration from Next.js is deliberate: the application relies on public browser-accessible data and local plans, so a client-side React architecture makes component composition, routing, effects, controlled forms, and state ownership visible without adding a runtime server. This trades away server rendering and route-specific SEO. See [engineering decisions](docs/engineering-decisions.md) for the reasoning and reconsideration criteria.
+The migration from Next.js is deliberate: the application relies on public browser-accessible data and local plans, so a client-side React architecture avoids a runtime server and keeps state ownership within React. This trades away server rendering and route-specific SEO. See [engineering decisions](docs/engineering-decisions.md) for the reasoning and reconsideration criteria.
 
 ## Features
 
-- Discover six curated travel places with locally hosted destination photography, small flag metadata, and an expandable country catalogue.
+- Discover six curated travel places in a swipeable, keyboard-accessible carousel with locally hosted photography, small flag metadata, and an expandable country catalogue.
 - Explore country guides backed by real public metadata, including flags, capitals, languages, currencies, population, time zones, and coordinates.
 - Search places, countries and capitals, filter regions, and sort/paginate country guides. Submitted filters live in the URL and work with bookmarks and browser history.
 - Save favourites and return to a personal shortlist.
@@ -90,7 +90,7 @@ Flag images come from HTTPS URLs in country metadata (currently FlagCDN). Metada
 
 [Open-Meteo forecast documentation](https://open-meteo.com/en/docs) defines the keyless `/v1/forecast` endpoint and current `temperature_2m`, `wind_speed_10m`, and `weather_code` variables. Roamly requests explicit units and GMT timestamps at the country coordinates. Country guides use country coordinates; curated place guides use approximate place coordinates. These are model estimates, not observations or exact-address forecasts.
 
-The [free API terms](https://open-meteo.com/en/pricing) apply to noncommercial use, with 10,000 daily calls, 5,000 hourly calls, and 600 calls per minute and no uptime guarantee. Attribution links appear in the UI. Commercial use needs the appropriate licence and a different deployment boundary for any private key. No API keys or environment variables are needed for this portfolio application.
+The [free API terms](https://open-meteo.com/en/pricing) apply to noncommercial use, with limits of 10,000 daily calls, 5,000 hourly calls, 600 calls per minute, and 300,000 monthly calls, without an uptime guarantee. Attribution links appear in the UI. Commercial use needs the appropriate licence and a different deployment boundary for any private key. No API keys or environment variables are needed for this application.
 
 ### Destination photography
 
@@ -109,12 +109,14 @@ Six curated Pexels photographs are downloaded and served locally in 480/960 px v
 
 ## Getting started
 
-Use Node.js **24 or newer** and npm. From a fresh clone:
+Use a current patch of **Node.js 22 LTS (22.13.0 minimum)** or **Node.js 24+**, and npm. `.nvmrc` selects the Node 22 line; CI runs on Node 22 and 24. From a fresh clone:
 
 ```sh
 npm ci
 npm run dev
 ```
+
+The locked tools technically run on Node 20.19+, but Node 20 is end-of-life and is not a supported project baseline. Vite and its React plugin require 20.19+/22.12+; ESLint 10 raises the Node 22 floor to 22.13.0. Vitest, jsdom, Playwright, and React Router are compatible with this choice. See [Vite requirements](https://vite.dev/guide/), [ESLint requirements](https://eslint.org/docs/latest/use/migrate-to-10.0.0), and [Node release support](https://github.com/nodejs/Release).
 
 Open the URL printed by Vite. Public API calls require internet access. On Windows PowerShell with restricted script execution, use `npm.cmd` and `npx.cmd` instead of changing execution policy.
 
@@ -154,13 +156,9 @@ npm run validate
 npm audit
 ```
 
-On Linux CI, install Chromium system dependencies with `npx playwright install --with-deps chromium`. The GitHub Actions workflow runs the complete suite and a high-severity audit. It has been added locally; hosted CI has not run because this work has not been pushed.
+On Linux CI, install Chromium system dependencies with `npx playwright install --with-deps chromium`. The GitHub Actions workflow runs the complete suite and a high-severity audit.
 
 Unit/interaction tests exercise real mappings, invalid data, API errors, URL filtering, pagination bounds, favourite toggling, corrupt/inaccessible storage, trip dates, and immutability. Browser tests intercept upstream APIs with explicitly labelled fixtures for deterministic discovery, retries, weather isolation, favourite persistence, trip editing/reordering/removal, reloads, bookmarks, history, unavailable storage, unknown routes, and axe WCAG checks. Tests do not depend on live weather or create fake data in the application. A separate live-browser smoke check verified the real APIs and generated screenshots.
-
-Validation on 6 October 2026: clean `npm ci`, formatting, lint, strict typecheck, 22 unit/interaction tests, production build, 12 desktop/mobile browser tests, and `npm audit` all passed. The audit reported zero vulnerabilities. The production entry is approximately 109 KB gzip; lazy routes load separately. Repository scans found no Next.js imports/dependency, environment files, unused public assets, or common secret patterns.
-
-In an execution sandbox on Windows, Playwright must be allowed to terminate its own preview process tree. Restricted process permissions can delay teardown even when assertions pass; normal local execution and the Linux CI workflow do not need that sandbox permission.
 
 ## Accessibility
 
@@ -179,4 +177,5 @@ The [decision log](docs/engineering-decisions.md) covers Next.js-to-Vite migrati
 - Country guides use country coordinates; place guides use curated approximate coordinates. City geocoding and forecast ranges are future extensions.
 - One itinerary, one stop per country, last-writer-wins browser storage; no conflict resolution or export/import. Unsaved editor drafts are discarded when leaving the route.
 - Dates may overlap and leave gaps. The summary explains the distinction between summed nights and overall calendar span; it does not validate travel feasibility.
-- Browser automation covers Chromium desktop/mobile viewports, not real devices, WebKit, or Firefox. Asset provenance is inherited from the original repository; licensing should be confirmed before commercial publication.
+- Browser automation covers Chromium desktop/mobile viewports, not real devices, WebKit, or Firefox.
+- The original camping photograph (`public/camp-lake.jpg`) has no recorded source/licence. Confirm redistribution rights before public publication or replace it with a documented asset. Curated destination photo sources are documented separately.
